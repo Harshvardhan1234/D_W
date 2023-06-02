@@ -1,0 +1,31 @@
+from sklearn.metrics import pairwise_distances
+from sklearn.datasets import make_blobs
+
+def k_medoids(X, n_clusters, max_iterations=100):
+    # Initialize medoids randomly
+    medoids = X[np.random.choice(X.shape[0], n_clusters, replace=False)]
+
+    for _ in range(max_iterations):
+        # Assign each sample to the nearest medoid
+        distances = pairwise_distances(X, medoids)
+        labels = np.argmin(distances, axis=1)
+
+        # Update medoids
+        for i in range(n_clusters):
+            indices = np.where(labels == i)
+            cluster_samples = X[indices]
+            cluster_distances = pairwise_distances(cluster_samples, cluster_samples)
+            total_distances = np.sum(cluster_distances, axis=1)
+            new_medoid_index = indices[0][np.argmin(total_distances)]
+            medoids[i] = X[new_medoid_index]
+
+    return labels, medoids
+
+# Example usage
+X, _ = make_blobs(n_samples=100, centers=4, random_state=42)
+n_clusters = 4
+labels, medoids = k_medoids(X, n_clusters)
+
+# Print the resulting labels and medoids
+print("Cluster labels:", labels)
+print("Medoids:", medoids)
